@@ -1,135 +1,105 @@
 const canvas = document.getElementById("game-board");
 const ctx = canvas.getContext("2d");
-
 ctx.fillStyle = "grey";
 ctx.fillRect(0,0,canvas.width,canvas.height);
 
-const paddle_width = 10;
-const paddle_height = 100;
-const player_paddle_x_position = 10;
-const pc_paddle_x_position = canvas.width - paddle_width - 10;
-
-let player_paddle_y_position = 300;
-let pc_paddle_y_position = 400;
-
-const ball_width = 10;
-const ball_height = 10;
-let ball_x_position = 300;
-let ball_y_position = 40;
-
-let ball_x_direction = -10;
-let ball_y_direction = 10
-
-function drawPlayerPaddle(){
-    ctx.fillStyle = "black";
-    ctx.fillRect(player_paddle_x_position,player_paddle_y_position,paddle_width,paddle_height);
-}
-function clearPaddle(){
-    ctx.fillStyle = "grey";
-    ctx.fillRect(player_paddle_x_position,player_paddle_y_position,paddle_width,paddle_height);
-}
-
-function drawPCPaddle(){
-    ctx.fillStyle = "black";
-    ctx.fillRect(pc_paddle_x_position,pc_paddle_y_position,paddle_width,paddle_height);
-}
-function clearPCPaddle(){
-    ctx.fillStyle = "grey";
-    ctx.fillRect(pc_paddle_x_position,pc_paddle_y_position,paddle_width,paddle_height);
-}
-
-function animateBall(){
-    ctx.fillStyle = "white";
-    ctx.fillRect(ball_x_position,ball_y_position,ball_width,ball_height);
-}
-function clearBall(){
-    ctx.fillStyle = "grey";
-    ctx.fillRect(ball_x_position,ball_y_position,ball_width,ball_height);
-}
-function checkCollision(){
-    // CHECK IF BALL HITS TOP
-    if(ball_y_position === 0 && ball_y_position <= 0 ){
-        ball_y_direction = - ball_y_direction;
+class GamePiece {
+    constructor(width,height,x,y,color){
+        this.width = width;
+        this.height = height;
+        this.x = x;
+        this.y = y;
+        this.color = color;
     }
-    // CHECK IF BALL HITS LEFT
-    if(ball_x_position === 0){
-        stopBall();
-        alert("You lose!");
+    describe(){
+        console.table(this);
     }
-    // CHECK IF BALL HITS BOTTOM
-    if(ball_y_position === canvas.height - ball_height){
-        ball_y_direction = - ball_y_direction;
+    draw(){
+        ctx.fillStyle = this.color;
+        ctx.fillRect(this.x,this.y,this.width,this.height);
     }
-    // CHECK IF BALL HITS RIGHT
-    if(ball_x_position === canvas.width - ball_width){
-        stopBall();
-        alert("You win!");
-    }
-    // CHECK IF BALL HITS LEFT PADDLE
-    if(ball_x_position === (player_paddle_x_position + paddle_width)  && (ball_y_position >= player_paddle_y_position && ball_y_position <= (player_paddle_y_position + paddle_height))){
-        ball_x_direction = -ball_x_direction;
-    }
-    // // CHECK IF BALL HITS RIGHT PADDLE
-    if(ball_x_position === (pc_paddle_x_position - paddle_width) && (ball_y_position >= pc_paddle_y_position && ball_y_position <= (pc_paddle_y_position + paddle_height))){
-        ball_x_direction = -ball_x_direction;
+    clear(){
+        ctx.fillStyle = "grey";
+        ctx.fillRect(this.x,this.y,this.width,this.height);
     }
 }
 
-function step(){
-    clearBall()
-    ball_x_position += ball_x_direction;
-    ball_y_position -= ball_y_direction;
-    animateBall();
-    checkCollision();
-}
-
-function stopBall(){
-    clearInterval(moveBall);
-}
-drawPlayerPaddle();
-drawPCPaddle();
-animateBall();
-let moveBall = setInterval(step,75);
-// stopBall();
-
-let movePCPaddle = setInterval(()=>{
-    if(ball_y_position > pc_paddle_y_position){
-        clearPCPaddle();
-        pc_paddle_y_position += 10;
-        drawPCPaddle();
-    }else{
-        clearPCPaddle();
-        pc_paddle_y_position -= 10;
-        drawPCPaddle();
+class Paddle extends GamePiece {
+    constructor(width,height,x,y,y_speed){
+        super(width,height,x,y,);
+        this.y_speed = y_speed;
+        this.color = "black";
     }
-},100)
-clearInterval(movePCPaddle);
+    moveUp(){
+        if(this.y === 0) return;
+        this.clear();
+        this.y -= 10;
+        this.draw();
+    }
+    moveDown(){
+        if(this.y + this.height === 600) return;
+        this.clear();
+        this.y += 10;
+        this.draw();
+    }
+}
+class Ball extends GamePiece {
+    constructor(width,height,x,y,x_speed,y_speed){
+        super(width,height,x,y);
+        this.x_speed = x_speed;
+        this.y_speed = y_speed;
+        this.color = "white";
+    }
+    move(){
+        this.clear();
+        this.checkCollision();
+        this.x = this.x - this.x_speed;
+        this.y = this.y - this.y_speed;
+        this.draw();
+    }
+    checkCollision(){
+        if(this.y === 0 || this.y === 600 - 10){
+            this.y_speed = -this.y_speed;
+        }
+        if(this.x === 0){
+            alert("You lose...")
+        }else if(this.x === 1000 - 10){
+            alert("You win...")
+        }
+        if(this.x === 20 && (this.y >= playerOnePaddle.y && this.y <= (playerOnePaddle.y + playerOnePaddle.height))){
+            this.x_speed = -this.x_speed;
+        }else if(this.x === 970 && (this.y >= playerTwoPaddle.y && this.y <= (playerTwoPaddle.y + playerTwoPaddle.height))){
+            this.x_speed = -this.x_speed;
+        }
+    }
+}
+
+// INIT 
+const ball = new Ball(10,10,600,300,10,-10);
+const playerOnePaddle = new Paddle(10,100,10,300,10,10);
+const playerTwoPaddle = new Paddle(10,100,980,500,10,10);
+
+ball.draw();
+playerOnePaddle.draw();
+playerTwoPaddle.draw();
+
+// const test = setInterval(()=>{
+//     ball.move()
+// },100)
 
 window.addEventListener("keypress", e =>{
     switch(e.key){
         case "w" : 
-            if(player_paddle_y_position === 0) return;
-            clearPaddle();
-            player_paddle_y_position -= 10;
-            drawPlayerPaddle();
+            playerOnePaddle.moveUp();
             break;
         case "s" : 
-            if(player_paddle_y_position === canvas.height - paddle_height) return;
-            clearPaddle();
-            player_paddle_y_position += 10;
-            drawPlayerPaddle();
+            playerOnePaddle.moveDown();
             break;
         case "8" : 
-            if(pc_paddle_y_position === 0) return;
-            clearPCPaddle();
-            pc_paddle_y_position -= 10;
-            drawPCPaddle();
+            playerTwoPaddle.moveUp();
             break;
         case "2" : 
-            if(pc_paddle_y_position === canvas.height - paddle_height) return;
-            clearPCPaddle();
-            pc_paddle_y_position += 10;
-            drawPCPaddle();
+            playerTwoPaddle.moveDown();
             break;
     }
 })

@@ -11,9 +11,6 @@ class GamePiece {
         this.y = y;
         this.color = color;
     }
-    describe(){
-        console.table(this);
-    }
     draw(){
         ctx.fillStyle = this.color;
         ctx.fillRect(this.x,this.y,this.width,this.height);
@@ -74,18 +71,19 @@ class Ball extends GamePiece {
     }
 }
 
-// INIT 
 const ball = new Ball(10,10,600,300,10,-10);
 const playerOnePaddle = new Paddle(10,100,10,300,10,10);
 const playerTwoPaddle = new Paddle(10,100,980,500,10,10);
 
+const test = setInterval(()=> ball.move(), 100);
+// const speedUp = setInterval(() => {
+//     ball.x_speed = ball.x_speed 
+//     ball.y_speed = ball.y_speed 
+// },2000)
+
 ball.draw();
 playerOnePaddle.draw();
 playerTwoPaddle.draw();
-
-// const test = setInterval(()=>{
-//     ball.move()
-// },100)
 
 window.addEventListener("keypress", e =>{
     switch(e.key){
@@ -100,6 +98,8 @@ window.addEventListener("keypress", e =>{
             break;
         case "2" : 
             playerTwoPaddle.moveDown();
+            break;
+        default :
             break;
     }
 })
